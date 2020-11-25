@@ -1,0 +1,153 @@
+#include<stdio.h> 
+#include<stdlib.h>
+
+
+//定义结构体 
+typedef struct node
+{
+	char data;
+	struct node* Lchild;
+	struct node* Rchild;  //定义左右子树 
+	int Ltag,Rtag; //定义 左右标志域  （1指向前后缀，0指向左右子树） 
+}BiNode,*BiTree;
+
+BiTree pre=NULL;  //定义全局变量pre 记录刚刚访问过的结点 
+
+//先序创建二叉树 
+BiTree CreateTree() 
+{
+	BiTree T;
+	char data;
+	scanf("%c",&data);
+	if(data=='#')   //#表示空子树 
+	{
+		T=NULL;
+	}
+	else
+	{
+		T=(BiTree)malloc(sizeof(BiNode));
+		T->data=data;
+		T->Lchild=CreateTree();
+		T->Rchild=CreateTree();
+	}
+	return T; 
+}
+
+
+//二叉树 （中序 ）线索化 
+void InThread(BiTree T)  
+{
+	
+	if(T!=NULL)
+	{
+		InThread(T->Lchild) ; //线索化左子树 
+		
+		
+		if(T->Lchild==NULL)
+		{
+			T->Lchild==pre;//前驱线索 
+			T->Ltag=1; 
+		}
+		if(pre!=NULL && pre->Rchild==NULL)
+		{
+			pre->Rchild=T; //后驱线索 
+			pre->Rtag=1;
+		}
+		pre=T;//pre为刚刚访问过的结点，T为当前结点，pre后移
+		
+		
+		InThread(T->Rchild) ;//线索化右子树 
+	}
+}
+
+
+
+//遍历（中序）线索二叉树 
+void InOrder(BiTree T) 
+{
+	while(T!=NULL)
+	{
+		//一直找左子树，最后一个左结点输出 
+		while(T->Ltag!=1)
+		{
+			T=T->Lchild; 
+		}
+		printf("%c",T->data);
+		//结点右标志为1，直接找到后继结点输出 
+		while(T->Rtag==1 &&T->Rchild!=NULL)
+		{
+			T=T->Rchild;
+			printf("%c",T->data);
+		}
+		T=T->Rchild;
+	}
+}
+
+
+
+
+//二叉树（先序）线索化 
+void PreThread(BiTree T)
+{
+	
+	if(T!=NULL)
+	{
+		if(T->Lchild==NULL)
+		{
+			T->Lchild==pre;//前驱线索 
+			T->Ltag=1; 
+		}
+		if(pre!=NULL && pre->Rchild==NULL)
+		{
+			pre->Rchild=T; //后驱线索 
+			pre->Rtag=1;
+		}
+		
+		pre=T;//pre为刚刚访问过的结点，T为当前结点，pre后移
+		if(T->Ltag!=1)
+			PreThread(T->Lchild) ; //线索化左子树 
+		if(T->Rtag!=1)
+			PreThread(T->Rchild) ;//线索化右子树 
+	}
+}
+
+
+// 遍历（先序）线索二叉树 
+void PreOrder(BiTree T)
+{
+	if(T!=NULL)
+	{
+		BiTree p=T;
+		while(p!=NULL)
+		{
+			while(p->Ltag!=1)
+			{
+				printf("%c",p->data);
+				p=p->Lchild;
+			}
+			printf("%c",p->data);
+			p=p->Rchild;
+			
+		}
+	}
+}
+
+
+
+int main() 
+{
+	printf("请输入先序遍历的序列（#指空）：\n");
+	BiTree T=CreateTree();
+	
+	PreThread(T) ;
+	printf("输出先序遍历的线索二叉树序列：\n");
+	PreOrder(T);
+	
+	InThread(T);
+	printf("输出中序遍历的线索二叉树序列：\n");
+    InOrder(T) ;
+    
+    
+	return 0 ; 
+}
+
